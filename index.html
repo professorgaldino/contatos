@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Tabela de Contatos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+    tr:hover {
+      background-color: #f1f1f1;
+    }
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+
+<h2>Lista de Contatos</h2>
+<input type="text" id="pesquisa" placeholder="Pesquisar por nome, telefone ou endereço..." oninput="filtrarTabela()">
+
+<table id="tabelaContatos">
+  <thead>
+    <tr>
+      <th>Nome</th>
+      <th>Telefone</th>
+      <th>Endereço</th>
+    </tr>
+  </thead>
+  <tbody id="corpoTabela">
+    <tr><td colspan="3">Carregando dados...</td></tr>
+  </tbody>
+</table>
+
+<script>
+let contatos = [];
+
+function formatarTelefone(telefone) {
+  if (!telefone || telefone.length < 12) return telefone;
+  return `(${telefone.slice(2, 4)}) ${telefone.slice(4, 9)}-${telefone.slice(9)}`;
+}
+
+function renderizarTabela(lista) {
+  const corpo = document.getElementById("corpoTabela");
+  corpo.innerHTML = "";
+
+  if (lista.length === 0) {
+    corpo.innerHTML = "<tr><td colspan='3'>Nenhum contato encontrado.</td></tr>";
+    return;
+  }
+
+  lista.forEach(contato => {
+    const linha = document.createElement("tr");
+    linha.innerHTML = `
+      <td>${contato.nome}</td>
+      <td>${formatarTelefone(contato.telefone)}</td>
+      <td>${contato.endereco || "-"}</td>
+    `;
+    corpo.appendChild(linha);
+  });
+}
+
+function filtrarTabela() {
+  const termo = document.getElementById("pesquisa").value.toLowerCase();
+  const filtrados = contatos.filter(c =>
+    c.nome.toLowerCase().includes(termo) ||
+    c.telefone.includes(termo) ||
+    (c.endereco && c.endereco.toLowerCase().includes(termo))
+  );
+  renderizarTabela(filtrados);
+}
+
+fetch('contatos.json')
+  .then(response => response.json())
+  .then(data => {
+    contatos = data;
+    renderizarTabela(contatos);
+  })
+  .catch(error => {
+    document.getElementById("corpoTabela").innerHTML = "<tr><td colspan='3'>Erro ao carregar contatos.</td></tr>";
+    console.error("Erro ao carregar JSON:", error);
+  });
+</script>
+
+</body>
+</html>
