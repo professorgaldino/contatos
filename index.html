@@ -56,6 +56,45 @@
 <script>
 let contatos = [];
 
+// Corrige caracteres mal codificados como ELOÃSA → ELOÍSA
+function corrigirEncoding(nome) {
+  if (!nome) return "";
+  const mapa = {
+    'Ã¡': 'á', 'Ã ': 'à', 'Ã¢': 'â', 'Ã£': 'ã',
+    'Ãª': 'ê', 'Ã©': 'é', 'Ã¨': 'è',
+    'Ã­': 'í', 'Ã¬': 'ì',
+    'Ã³': 'ó', 'Ã²': 'ò', 'Ã´': 'ô', 'Ãµ': 'õ',
+    'Ãº': 'ú', 'Ã¹': 'ù',
+    'Ã§': 'ç',
+    'Ã': 'Á', 'Ã€': 'À', 'Ã‚': 'Â', 'Ãƒ': 'Ã',
+    'ÃŠ': 'Ê', 'Ã‰': 'É', 'Ãˆ': 'È',
+    'Ã': 'Í', 'ÃŒ': 'Ì',
+    'Ã“': 'Ó', 'Ã’': 'Ò', 'Ã”': 'Ô', 'Ã•': 'Õ',
+    'Ãš': 'Ú', 'Ã™': 'Ù',
+    'Ã‡': 'Ç',
+    'Â': '', // Remove "Â" usado indevidamente
+  };
+  let corrigido = nome;
+  for (let erro in mapa) {
+    corrigido = corrigido.split(erro).join(mapa[erro]);
+  }
+  return corrigido;
+}
+
+// Corrige nomes comuns que costumam vir sem acento
+function corrigirNomeSemAcento(nome) {
+  const mapa = {
+    'JOAO': 'JOÃO',
+    'MARCIA': 'MÁRCIA',
+    'ELOISA': 'ELOÍSA',
+    'ANA LUISA': 'ANA LUÍSA',
+    'LUCIA': 'LÚCIA',
+    'CLAUDIA': 'CLÁUDIA'
+    // adicione mais conforme necessário
+  };
+  return mapa[nome.toUpperCase()] || nome;
+}
+
 function formatarTelefone(telefone) {
   if (!telefone) return '';
   const tel = telefone.replace(/\D/g, '');
@@ -68,6 +107,7 @@ function formatarTelefone(telefone) {
 function montarNome(contato) {
   return [contato["First Name"], contato["Middle Name"], contato["Last Name"]]
     .filter(Boolean)
+    .map(n => corrigirNomeSemAcento(corrigirEncoding(n)))
     .join(" ");
 }
 
@@ -91,7 +131,7 @@ function renderizarTabela(lista) {
     linha.innerHTML = `
       <td>${montarNome(contato)}</td>
       <td>${montarTelefones(contato)}</td>
-      <td>${contato["Last Name"] || "-"}</td>
+      <td>${corrigirNomeSemAcento(corrigirEncoding(contato["Last Name"] || "-"))}</td>
     `;
     corpo.appendChild(linha);
   });
@@ -103,7 +143,7 @@ function filtrarTabela() {
     montarNome(c).toLowerCase().includes(termo) ||
     (c["Phone 1 - Value"] && c["Phone 1 - Value"].includes(termo)) ||
     (c["Phone 2 - Value"] && c["Phone 2 - Value"].includes(termo)) ||
-    (c["Last Name"] && c["Last Name"].toLowerCase().includes(termo))
+    (c["Last Name"] && corrigirEncoding(c["Last Name"]).toLowerCase().includes(termo))
   );
   renderizarTabela(filtrados);
 }
