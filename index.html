@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Tabela de Contatos - Visualização Específica</title>
+  <title>Tabela de Contatos - Layout Específico</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -30,11 +30,13 @@
       margin-top: 10px;
       border: 1px solid #ddd;
       border-radius: 4px;
+      max-height: 80vh;
+      overflow-y: auto;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1200px;
+      min-width: 1800px;
     }
     th, td {
       padding: 10px 12px;
@@ -43,11 +45,12 @@
       white-space: nowrap;
     }
     th {
-      background-color: #007bff;
+      background-color: #2c3e50;
       color: white;
       position: sticky;
-      top: 60px;
+      top: 0;
       font-weight: normal;
+      font-size: 14px;
     }
     tr:hover {
       background-color: #f5f5f5;
@@ -57,41 +60,76 @@
       padding: 20px;
     }
     .no-results {
-      color: #ff6b6b;
+      color: #e74c3c;
     }
     .empty-field {
-      color: #999;
+      color: #95a5a6;
       font-style: italic;
     }
-    .highlight {
-      background-color: #fffde7;
+    .has-value {
+      background-color: #ecf0f1;
     }
   </style>
 </head>
 <body>
 
-<h2>Lista de Contatos - Estrutura Específica</h2>
+<h2>Lista de Contatos</h2>
 <div class="search-container">
-  <input type="text" id="pesquisa" placeholder="Pesquisar em todos os campos..." oninput="filtrarTabela()">
+  <input type="text" id="pesquisa" placeholder="Digite para filtrar em qualquer campo..." oninput="filtrarTabela()">
 </div>
 
 <div class="table-container">
   <table id="tabelaContatos">
-    <thead id="cabecalhoTabela">
-      <!-- Cabeçalho será gerado dinamicamente na ordem específica -->
+    <thead>
+      <tr>
+        <th>First Name</th>
+        <th>Middle Name</th>
+        <th>Last Name</th>
+        <th>Phonetic First Name</th>
+        <th>Phonetic Middle Name</th>
+        <th>Phonetic Last Name</th>
+        <th>Name Prefix</th>
+        <th>Name Suffix</th>
+        <th>Nickname</th>
+        <th>File As</th>
+        <th>Organization Name</th>
+        <th>Organization Title</th>
+        <th>Organization Department</th>
+        <th>Birthday</th>
+        <th>Notes</th>
+        <th>Photo</th>
+        <th>Labels</th>
+        <th>E-mail 1 - Label</th>
+        <th>E-mail 1 - Value</th>
+        <th>Phone 1 - Label</th>
+        <th>Phone 1 - Value</th>
+        <th>Phone 2 - Label</th>
+        <th>Phone 2 - Value</th>
+        <th>Phone 3 - Label</th>
+        <th>Phone 3 - Value</th>
+        <th>Phone 4 - Label</th>
+        <th>Phone 4 - Value</th>
+        <th>Address 1 - Label</th>
+        <th>Address 1 - Formatted</th>
+        <th>Address 1 - Street</th>
+        <th>Address 1 - City</th>
+        <th>Address 1 - PO Box</th>
+        <th>Address 1 - Region</th>
+        <th>Address 1 - Postal Code</th>
+        <th>Address 1 - Country</th>
+        <th>Address 1 - Extended Address</th>
+      </tr>
     </thead>
     <tbody id="corpoTabela">
-      <tr><td colspan="100%" class="loading">Carregando dados...</td></tr>
+      <tr><td colspan="35" class="loading">Carregando dados dos contatos...</td></tr>
     </tbody>
   </table>
 </div>
 
 <script>
-let contatos = [];
-
-// Ordem específica dos campos que você definiu
-const ordemCampos = [
-  "First Name", "Middle Name", "Last Name", 
+// Lista fixa de campos na ordem exata que você definiu
+const CAMPOS = [
+  "First Name", "Middle Name", "Last Name",
   "Phonetic First Name", "Phonetic Middle Name", "Phonetic Last Name",
   "Name Prefix", "Name Suffix", "Nickname", "File As",
   "Organization Name", "Organization Title", "Organization Department",
@@ -107,71 +145,40 @@ const ordemCampos = [
   "Address 1 - Extended Address"
 ];
 
-// Função para corrigir caracteres mal codificados
-function corrigirEncoding(texto) {
-  if (!texto) return "";
-  const mapa = {
-    'Ã¡': 'á', 'Ã€': 'À', 'Ã‚': 'Â', 'Ãƒ': 'Ã',
-    'ÃŠ': 'Ê', 'Ã‰': 'É', 'Ãˆ': 'È',
-    'Ã': 'Í', 'ÃŒ': 'Ì',
-    'Ã“': 'Ó', 'Ã’': 'Ò', 'Ã”': 'Ô', 'Ã•': 'Õ',
-    'Ãš': 'Ú', 'Ã™': 'Ù',
-    'Ã‡': 'Ç',
-    'Â': ''
-  };
-  let corrigido = texto;
-  for (let erro in mapa) {
-    corrigido = corrigido.split(erro).join(mapa[erro]);
-  }
-  return corrigido;
-}
+let contatos = [];
 
-// Função para formatar valores
 function formatarValor(valor) {
   if (valor === null || valor === undefined || valor === "") {
-    return '<span class="empty-field">(vazio)</span>';
+    return '<span class="empty-field">-</span>';
   }
-  return corrigirEncoding(valor.toString());
+  return valor;
 }
 
-// Função para renderizar o cabeçalho na ordem específica
-function renderizarCabecalho() {
-  const cabecalho = document.getElementById("cabecalhoTabela");
-  cabecalho.innerHTML = "";
-  
-  const linha = document.createElement("tr");
-  ordemCampos.forEach(chave => {
-    const th = document.createElement("th");
-    th.textContent = chave;
-    linha.appendChild(th);
-  });
-  cabecalho.appendChild(linha);
-}
+function renderizarTabela(dados) {
+  const tbody = document.getElementById("corpoTabela");
+  tbody.innerHTML = "";
 
-// Função para renderizar os dados na tabela
-function renderizarTabela(lista) {
-  const corpo = document.getElementById("corpoTabela");
-  corpo.innerHTML = "";
-
-  if (lista.length === 0) {
-    corpo.innerHTML = `<tr><td colspan="${ordemCampos.length}" class="no-results">Nenhum contato encontrado.</td></tr>`;
+  if (dados.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${CAMPOS.length}" class="no-results">Nenhum resultado encontrado</td></tr>`;
     return;
   }
 
-  lista.forEach(contato => {
-    const linha = document.createElement("tr");
+  dados.forEach(contato => {
+    const tr = document.createElement("tr");
     
-    ordemCampos.forEach(chave => {
+    CAMPOS.forEach(campo => {
       const td = document.createElement("td");
-      td.innerHTML = formatarValor(contato[chave]);
-      linha.appendChild(td);
+      const valor = contato[campo];
+      td.innerHTML = formatarValor(valor);
+      
+      if (valor) td.classList.add("has-value");
+      tr.appendChild(td);
     });
     
-    corpo.appendChild(linha);
+    tbody.appendChild(tr);
   });
 }
 
-// Função para filtrar a tabela
 function filtrarTabela() {
   const termo = document.getElementById("pesquisa").value.toLowerCase();
   
@@ -180,37 +187,28 @@ function filtrarTabela() {
     return;
   }
 
-  const filtrados = contatos.filter(contato => {
-    return ordemCampos.some(chave => {
-      const valor = contato[chave];
+  const resultados = contatos.filter(contato => {
+    return CAMPOS.some(campo => {
+      const valor = contato[campo];
       return valor && valor.toString().toLowerCase().includes(termo);
     });
   });
 
-  renderizarTabela(filtrados);
+  renderizarTabela(resultados);
 }
 
-// Carrega os dados do JSON
+// Carregar dados
 fetch('contatos.json')
   .then(response => response.json())
   .then(data => {
     contatos = Array.isArray(data) ? data : [data];
-    renderizarCabecalho();
     renderizarTabela(contatos);
-    
-    // Destacar campos com valores (opcional)
-    document.querySelectorAll('td').forEach(td => {
-      if (!td.querySelector('.empty-field')) {
-        td.classList.add('highlight');
-      }
-    });
   })
   .catch(error => {
     document.getElementById("corpoTabela").innerHTML = 
-      `<tr><td colspan="${ordemCampos.length}" class="no-results">Erro ao carregar contatos: ${error.message}</td></tr>`;
-    console.error("Erro ao carregar JSON:", error);
+      `<tr><td colspan="${CAMPOS.length}" class="no-results">Erro ao carregar: ${error.message}</td></tr>`;
+    console.error("Erro:", error);
   });
 </script>
-
 </body>
 </html>
