@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Tabela de Contatos - Visualização Completa</title>
+  <title>Tabela de Contatos - Visualização Específica</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -34,10 +34,10 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 800px;
+      min-width: 1200px;
     }
     th, td {
-      padding: 12px 15px;
+      padding: 10px 12px;
       text-align: left;
       border-bottom: 1px solid #ddd;
       white-space: nowrap;
@@ -47,6 +47,7 @@
       color: white;
       position: sticky;
       top: 60px;
+      font-weight: normal;
     }
     tr:hover {
       background-color: #f5f5f5;
@@ -62,11 +63,14 @@
       color: #999;
       font-style: italic;
     }
+    .highlight {
+      background-color: #fffde7;
+    }
   </style>
 </head>
 <body>
 
-<h2>Lista Completa de Contatos</h2>
+<h2>Lista de Contatos - Estrutura Específica</h2>
 <div class="search-container">
   <input type="text" id="pesquisa" placeholder="Pesquisar em todos os campos..." oninput="filtrarTabela()">
 </div>
@@ -74,7 +78,7 @@
 <div class="table-container">
   <table id="tabelaContatos">
     <thead id="cabecalhoTabela">
-      <!-- Cabeçalho será gerado dinamicamente -->
+      <!-- Cabeçalho será gerado dinamicamente na ordem específica -->
     </thead>
     <tbody id="corpoTabela">
       <tr><td colspan="100%" class="loading">Carregando dados...</td></tr>
@@ -84,7 +88,24 @@
 
 <script>
 let contatos = [];
-let todasAsChaves = [];
+
+// Ordem específica dos campos que você definiu
+const ordemCampos = [
+  "First Name", "Middle Name", "Last Name", 
+  "Phonetic First Name", "Phonetic Middle Name", "Phonetic Last Name",
+  "Name Prefix", "Name Suffix", "Nickname", "File As",
+  "Organization Name", "Organization Title", "Organization Department",
+  "Birthday", "Notes", "Photo", "Labels",
+  "E-mail 1 - Label", "E-mail 1 - Value",
+  "Phone 1 - Label", "Phone 1 - Value",
+  "Phone 2 - Label", "Phone 2 - Value",
+  "Phone 3 - Label", "Phone 3 - Value",
+  "Phone 4 - Label", "Phone 4 - Value",
+  "Address 1 - Label", "Address 1 - Formatted",
+  "Address 1 - Street", "Address 1 - City", "Address 1 - PO Box",
+  "Address 1 - Region", "Address 1 - Postal Code", "Address 1 - Country",
+  "Address 1 - Extended Address"
+];
 
 // Função para corrigir caracteres mal codificados
 function corrigirEncoding(texto) {
@@ -105,19 +126,21 @@ function corrigirEncoding(texto) {
   return corrigido;
 }
 
-// Função para formatar telefones (mantém o original, apenas corrige encoding)
-function formatarValor(chave, valor) {
-  valor = corrigirEncoding(valor);
-  return valor || '<span class="empty-field">(vazio)</span>';
+// Função para formatar valores
+function formatarValor(valor) {
+  if (valor === null || valor === undefined || valor === "") {
+    return '<span class="empty-field">(vazio)</span>';
+  }
+  return corrigirEncoding(valor.toString());
 }
 
-// Função para renderizar o cabeçalho da tabela
+// Função para renderizar o cabeçalho na ordem específica
 function renderizarCabecalho() {
   const cabecalho = document.getElementById("cabecalhoTabela");
   cabecalho.innerHTML = "";
   
   const linha = document.createElement("tr");
-  todasAsChaves.forEach(chave => {
+  ordemCampos.forEach(chave => {
     const th = document.createElement("th");
     th.textContent = chave;
     linha.appendChild(th);
@@ -131,16 +154,16 @@ function renderizarTabela(lista) {
   corpo.innerHTML = "";
 
   if (lista.length === 0) {
-    corpo.innerHTML = `<tr><td colspan="${todasAsChaves.length}" class="no-results">Nenhum contato encontrado.</td></tr>`;
+    corpo.innerHTML = `<tr><td colspan="${ordemCampos.length}" class="no-results">Nenhum contato encontrado.</td></tr>`;
     return;
   }
 
   lista.forEach(contato => {
     const linha = document.createElement("tr");
     
-    todasAsChaves.forEach(chave => {
+    ordemCampos.forEach(chave => {
       const td = document.createElement("td");
-      td.innerHTML = formatarValor(chave, contato[chave]);
+      td.innerHTML = formatarValor(contato[chave]);
       linha.appendChild(td);
     });
     
@@ -158,10 +181,10 @@ function filtrarTabela() {
   }
 
   const filtrados = contatos.filter(contato => {
-    // Verifica em todos os campos do contato
-    return Object.values(contato).some(
-      valor => valor && valor.toString().toLowerCase().includes(termo)
-    );
+    return ordemCampos.some(chave => {
+      const valor = contato[chave];
+      return valor && valor.toString().toLowerCase().includes(termo);
+    });
   });
 
   renderizarTabela(filtrados);
@@ -172,16 +195,19 @@ fetch('contatos.json')
   .then(response => response.json())
   .then(data => {
     contatos = Array.isArray(data) ? data : [data];
-    
-    // Obtém todas as chaves únicas de todos os contatos
-    todasAsChaves = [...new Set(contatos.flatMap(Object.keys))];
-    
     renderizarCabecalho();
     renderizarTabela(contatos);
+    
+    // Destacar campos com valores (opcional)
+    document.querySelectorAll('td').forEach(td => {
+      if (!td.querySelector('.empty-field')) {
+        td.classList.add('highlight');
+      }
+    });
   })
   .catch(error => {
     document.getElementById("corpoTabela").innerHTML = 
-      `<tr><td colspan="${todasAsChaves.length || 5}" class="no-results">Erro ao carregar contatos: ${error.message}</td></tr>`;
+      `<tr><td colspan="${ordemCampos.length}" class="no-results">Erro ao carregar contatos: ${error.message}</td></tr>`;
     console.error("Erro ao carregar JSON:", error);
   });
 </script>
