@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Tabela de Contatos - Layout Otimizado</title>
+  <title>Tabela de Contatos - Layout Compacto</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -37,7 +37,6 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      table-layout: fixed;
     }
     th, td {
       padding: 8px 10px;
@@ -46,7 +45,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 150px;
     }
     th {
       background-color: #2c3e50;
@@ -73,6 +71,43 @@
     .has-value {
       background-color: #ecf0f1;
     }
+    .clickable {
+      cursor: pointer;
+      color: #2980b9;
+    }
+    
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+      width: 80%;
+      max-width: 700px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .close:hover {
+      color: black;
+    }
   </style>
 </head>
 <body>
@@ -86,42 +121,42 @@
   <table id="tabelaContatos">
     <thead>
       <tr>
-        <th style="width:120px">First Name</th>
-        <th style="width:100px">Middle Name</th>
-        <th style="width:120px">Last Name</th>
-        <th style="width:120px">Phonetic First</th>
-        <th style="width:100px">Phonetic Middle</th>
-        <th style="width:120px">Phonetic Last</th>
-        <th style="width:80px">Name Prefix</th>
-        <th style="width:80px">Name Suffix</th>
-        <th style="width:100px">Nickname</th>
-        <th style="width:100px">File As</th>
-        <th style="width:150px">Organization</th>
-        <th style="width:120px">Org. Title</th>
-        <th style="width:150px">Org. Department</th>
-        <th style="width:80px">Birthday</th>
-        <th style="width:200px">Notes</th>
-        <th style="width:80px">Photo</th>
-        <th style="width:100px">Labels</th>
-        <th style="width:100px">E-mail 1 Label</th>
-        <th style="width:180px">E-mail 1 Value</th>
-        <th style="width:100px">Phone 1 Label</th>
-        <th style="width:120px">Phone 1 Value</th>
-        <th style="width:100px">Phone 2 Label</th>
-        <th style="width:120px">Phone 2 Value</th>
-        <th style="width:100px">Phone 3 Label</th>
-        <th style="width:120px">Phone 3 Value</th>
-        <th style="width:100px">Phone 4 Label</th>
-        <th style="width:120px">Phone 4 Value</th>
-        <th style="width:100px">Address Label</th>
-        <th style="width:200px">Address Formatted</th>
-        <th style="width:150px">Street</th>
-        <th style="width:100px">City</th>
-        <th style="width:80px">PO Box</th>
-        <th style="width:100px">Region</th>
-        <th style="width:80px">Postal Code</th>
-        <th style="width:100px">Country</th>
-        <th style="width:150px">Ext. Address</th>
+        <th>First Name</th>
+        <th>Middle Name</th>
+        <th>Last Name</th>
+        <th>Phonetic First Name</th>
+        <th>Phonetic Middle Name</th>
+        <th>Phonetic Last Name</th>
+        <th>Name Prefix</th>
+        <th>Name Suffix</th>
+        <th>Nickname</th>
+        <th>File As</th>
+        <th>Organization Name</th>
+        <th>Organization Title</th>
+        <th>Organization Department</th>
+        <th>Birthday</th>
+        <th>Notes</th>
+        <th>Photo</th>
+        <th>Labels</th>
+        <th>E-mail 1 - Label</th>
+        <th>E-mail 1 - Value</th>
+        <th>Phone 1 - Label</th>
+        <th>Phone 1 - Value</th>
+        <th>Phone 2 - Label</th>
+        <th>Phone 2 - Value</th>
+        <th>Phone 3 - Label</th>
+        <th>Phone 3 - Value</th>
+        <th>Phone 4 - Label</th>
+        <th>Phone 4 - Value</th>
+        <th>Address 1 - Label</th>
+        <th>Address 1 - Formatted</th>
+        <th>Address 1 - Street</th>
+        <th>Address 1 - City</th>
+        <th>Address 1 - PO Box</th>
+        <th>Address 1 - Region</th>
+        <th>Address 1 - Postal Code</th>
+        <th>Address 1 - Country</th>
+        <th>Address 1 - Extended Address</th>
       </tr>
     </thead>
     <tbody id="corpoTabela">
@@ -130,25 +165,15 @@
   </table>
 </div>
 
-<script>
-// Lista fixa de campos na ordem exata que você definiu
-const CAMPOS = [
-  "First Name", "Middle Name", "Last Name",
-  "Phonetic First Name", "Phonetic Middle Name", "Phonetic Last Name",
-  "Name Prefix", "Name Suffix", "Nickname", "File As",
-  "Organization Name", "Organization Title", "Organization Department",
-  "Birthday", "Notes", "Photo", "Labels",
-  "E-mail 1 - Label", "E-mail 1 - Value",
-  "Phone 1 - Label", "Phone 1 - Value",
-  "Phone 2 - Label", "Phone 2 - Value",
-  "Phone 3 - Label", "Phone 3 - Value",
-  "Phone 4 - Label", "Phone 4 - Value",
-  "Address 1 - Label", "Address 1 - Formatted",
-  "Address 1 - Street", "Address 1 - City", "Address 1 - PO Box",
-  "Address 1 - Region", "Address 1 - Postal Code", "Address 1 - Country",
-  "Address 1 - Extended Address"
-];
+<!-- Modal de Detalhes -->
+<div id="detailModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <div id="modalContent"></div>
+  </div>
+</div>
 
+<script>
 // Mapa de correção de acentuação
 const mapaAcentos = {
   'Ã¡': 'á', 'Ã€': 'À', 'Ã‚': 'Â', 'Ãƒ': 'Ã',
@@ -172,6 +197,20 @@ const mapaAcentos = {
 };
 
 let contatos = [];
+const modal = document.getElementById("detailModal");
+const span = document.getElementsByClassName("close")[0];
+
+// Fechar modal ao clicar no X
+span.onclick = function() {
+  modal.style.display = "none";
+}
+
+// Fechar modal ao clicar fora
+window.onclick = function(event) {
+  if (event.target == modal) {
+    modal.style.display = "none";
+  }
+}
 
 function corrigirAcentos(texto) {
   if (typeof texto !== 'string') return texto;
@@ -183,11 +222,46 @@ function corrigirAcentos(texto) {
   return corrigido;
 }
 
-function formatarValor(valor) {
-  if (valor === null || valor === undefined || valor === "") {
-    return '<span class="empty-field">-</span>';
+function formatarTelefone(telefone) {
+  if (!telefone) return '';
+  const tel = telefone.replace(/\D/g, '');
+  if (tel.length === 11) {
+    return `(${tel.slice(0, 2)}) ${tel.slice(2, 7)}-${tel.slice(7)}`;
+  } else if (tel.length === 10) {
+    return `(${tel.slice(0, 2)}) ${tel.slice(2, 6)}-${tel.slice(6)}`;
   }
-  return corrigirAcentos(valor.toString());
+  return telefone;
+}
+
+function mostrarDetalhes(contato) {
+  const modalContent = document.getElementById("modalContent");
+  
+  // Organiza os dados em grupos lógicos
+  const html = `
+    <h2>${corrigirAcentos([contato["First Name"], contato["Middle Name"], contato["Last Name"]].filter(Boolean).join(" "))}</h2>
+    
+    <h3>Informações Básicas</h3>
+    <p><strong>Organização:</strong> ${contato["Organization Name"] || '-'}</p>
+    <p><strong>Cargo:</strong> ${contato["Organization Title"] || '-'}</p>
+    <p><strong>Departamento:</strong> ${contato["Organization Department"] || '-'}</p>
+    
+    <h3>Contatos</h3>
+    <p><strong>E-mail:</strong> ${contato["E-mail 1 - Value"] || '-'}</p>
+    <p><strong>${contato["Phone 1 - Label"] || 'Telefone'}:</strong> ${contato["Phone 1 - Value"] ? formatarTelefone(contato["Phone 1 - Value"]) : '-'}</p>
+    <p><strong>${contato["Phone 2 - Label"] || 'Telefone 2'}:</strong> ${contato["Phone 2 - Value"] ? formatarTelefone(contato["Phone 2 - Value"]) : '-'}</p>
+    
+    <h3>Endereço</h3>
+    <p>${contato["Address 1 - Formatted"] || contato["Address 1 - Street"] || '-'}</p>
+    <p>${[contato["Address 1 - City"], contato["Address 1 - Region"]].filter(Boolean).join(", ") || '-'}</p>
+    <p>${contato["Address 1 - Postal Code"] || ''} ${contato["Address 1 - Country"] || ''}</p>
+    
+    <h3>Outras Informações</h3>
+    <p><strong>Aniversário:</strong> ${contato["Birthday"] || '-'}</p>
+    <p><strong>Notas:</strong> ${contato["Notes"] || '-'}</p>
+  `;
+  
+  modalContent.innerHTML = html;
+  modal.style.display = "block";
 }
 
 function renderizarTabela(dados) {
@@ -195,19 +269,55 @@ function renderizarTabela(dados) {
   tbody.innerHTML = "";
 
   if (dados.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="${CAMPOS.length}" class="no-results">Nenhum resultado encontrado</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="35" class="no-results">Nenhum resultado encontrado</td></tr>`;
     return;
   }
 
   dados.forEach(contato => {
     const tr = document.createElement("tr");
     
-    CAMPOS.forEach(campo => {
+    // Primeiro nome (clicável)
+    const tdFirstName = document.createElement("td");
+    tdFirstName.innerHTML = contato["First Name"] ? corrigirAcentos(contato["First Name"]) : '<span class="empty-field">-</span>';
+    tdFirstName.classList.add("clickable");
+    if (contato["First Name"]) tdFirstName.classList.add("has-value");
+    tdFirstName.onclick = () => mostrarDetalhes(contato);
+    tr.appendChild(tdFirstName);
+    
+    // Middle Name
+    const tdMiddle = document.createElement("td");
+    tdMiddle.innerHTML = contato["Middle Name"] ? corrigirAcentos(contato["Middle Name"]) : '<span class="empty-field">-</span>';
+    if (contato["Middle Name"]) tdMiddle.classList.add("has-value");
+    tr.appendChild(tdMiddle);
+    
+    // Last Name
+    const tdLast = document.createElement("td");
+    tdLast.innerHTML = contato["Last Name"] ? corrigirAcentos(contato["Last Name"]) : '<span class="empty-field">-</span>';
+    if (contato["Last Name"]) tdLast.classList.add("has-value");
+    tr.appendChild(tdLast);
+    
+    // Demais campos (não clicáveis)
+    const camposRestantes = [
+      "Phonetic First Name", "Phonetic Middle Name", "Phonetic Last Name",
+      "Name Prefix", "Name Suffix", "Nickname", "File As",
+      "Organization Name", "Organization Title", "Organization Department",
+      "Birthday", "Notes", "Photo", "Labels",
+      "E-mail 1 - Label", "E-mail 1 - Value",
+      "Phone 1 - Label", "Phone 1 - Value",
+      "Phone 2 - Label", "Phone 2 - Value",
+      "Phone 3 - Label", "Phone 3 - Value",
+      "Phone 4 - Label", "Phone 4 - Value",
+      "Address 1 - Label", "Address 1 - Formatted",
+      "Address 1 - Street", "Address 1 - City", "Address 1 - PO Box",
+      "Address 1 - Region", "Address 1 - Postal Code", "Address 1 - Country",
+      "Address 1 - Extended Address"
+    ];
+    
+    camposRestantes.forEach(campo => {
       const td = document.createElement("td");
       const valor = contato[campo];
-      td.innerHTML = formatarValor(valor);
-      td.title = formatarValor(valor); // Tooltip com conteúdo completo
-      
+      td.innerHTML = valor ? corrigirAcentos(valor.toString()) : '<span class="empty-field">-</span>';
+      td.title = valor ? corrigirAcentos(valor.toString()) : '';
       if (valor) td.classList.add("has-value");
       tr.appendChild(td);
     });
@@ -225,7 +335,7 @@ function filtrarTabela() {
   }
 
   const resultados = contatos.filter(contato => {
-    return CAMPOS.some(campo => {
+    return Object.keys(contato).some(campo => {
       const valor = contato[campo];
       return valor && corrigirAcentos(valor.toString().toLowerCase()).includes(termo);
     });
@@ -240,10 +350,19 @@ fetch('contatos.json')
   .then(data => {
     contatos = Array.isArray(data) ? data : [data];
     renderizarTabela(contatos);
+    
+    // Ajustar automaticamente as larguras das colunas
+    setTimeout(() => {
+      const ths = document.querySelectorAll('th');
+      ths.forEach(th => {
+        const contentWidth = th.textContent.length * 8 + 20; // Largura baseada no conteúdo
+        th.style.width = `${Math.max(contentWidth, 80)}px`; // Mínimo de 80px
+      });
+    }, 100);
   })
   .catch(error => {
     document.getElementById("corpoTabela").innerHTML = 
-      `<tr><td colspan="${CAMPOS.length}" class="no-results">Erro ao carregar: ${error.message}</td></tr>`;
+      `<tr><td colspan="35" class="no-results">Erro ao carregar: ${error.message}</td></tr>`;
     console.error("Erro:", error);
   });
 </script>
