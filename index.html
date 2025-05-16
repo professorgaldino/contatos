@@ -44,7 +44,7 @@
   <thead>
     <tr>
       <th>Nome</th>
-      <th>Telefone</th>
+      <th>Telefones</th>
       <th>Endereço</th>
     </tr>
   </thead>
@@ -57,8 +57,24 @@
 let contatos = [];
 
 function formatarTelefone(telefone) {
-  if (!telefone || telefone.length < 12) return telefone;
-  return `(${telefone.slice(2, 4)}) ${telefone.slice(4, 9)}-${telefone.slice(9)}`;
+  if (!telefone) return '';
+  const tel = telefone.replace(/\D/g, '');
+  if (tel.length === 11) {
+    return `(${tel.slice(0, 2)}) ${tel.slice(2, 7)}-${tel.slice(7)}`;
+  }
+  return telefone;
+}
+
+function montarNome(contato) {
+  return [contato["First Name"], contato["Middle Name"], contato["Last Name"]]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function montarTelefones(contato) {
+  const tel1 = contato["Phone 1 - Value"] ? `${contato["Phone 1 - Label"] || ""}: ${formatarTelefone(contato["Phone 1 - Value"])}` : "";
+  const tel2 = contato["Phone 2 - Value"] ? `${contato["Phone 2 - Label"] || ""}: ${formatarTelefone(contato["Phone 2 - Value"])}` : "";
+  return [tel1, tel2].filter(Boolean).join("<br>");
 }
 
 function renderizarTabela(lista) {
@@ -73,9 +89,9 @@ function renderizarTabela(lista) {
   lista.forEach(contato => {
     const linha = document.createElement("tr");
     linha.innerHTML = `
-      <td>${contato.nome}</td>
-      <td>${formatarTelefone(contato.telefone)}</td>
-      <td>${contato.endereco || "-"}</td>
+      <td>${montarNome(contato)}</td>
+      <td>${montarTelefones(contato)}</td>
+      <td>${contato["Last Name"] || "-"}</td>
     `;
     corpo.appendChild(linha);
   });
@@ -84,9 +100,10 @@ function renderizarTabela(lista) {
 function filtrarTabela() {
   const termo = document.getElementById("pesquisa").value.toLowerCase();
   const filtrados = contatos.filter(c =>
-    c.nome.toLowerCase().includes(termo) ||
-    c.telefone.includes(termo) ||
-    (c.endereco && c.endereco.toLowerCase().includes(termo))
+    montarNome(c).toLowerCase().includes(termo) ||
+    (c["Phone 1 - Value"] && c["Phone 1 - Value"].includes(termo)) ||
+    (c["Phone 2 - Value"] && c["Phone 2 - Value"].includes(termo)) ||
+    (c["Last Name"] && c["Last Name"].toLowerCase().includes(termo))
   );
   renderizarTabela(filtrados);
 }
