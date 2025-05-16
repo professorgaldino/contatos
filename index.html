@@ -8,154 +8,220 @@
       font-family: Arial, sans-serif;
       padding: 20px;
     }
+    .search-container {
+      margin-bottom: 20px;
+    }
     input[type="text"] {
       width: 100%;
-      padding: 10px;
-      margin-bottom: 20px;
+      padding: 12px;
       font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
     }
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
     th, td {
-      padding: 12px;
-      border-bottom: 1px solid #ddd;
+      padding: 12px 15px;
       text-align: left;
-    }
-    tr:hover {
-      background-color: #f1f1f1;
+      border-bottom: 1px solid #ddd;
     }
     th {
       background-color: #007bff;
       color: white;
+      position: sticky;
+      top: 0;
+    }
+    tr:hover {
+      background-color: #f5f5f5;
+    }
+    .phone-number {
+      white-space: nowrap;
+    }
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+    .no-results {
+      text-align: center;
+      padding: 20px;
+      color: #ff6b6b;
     }
   </style>
 </head>
 <body>
 
 <h2>Lista de Contatos</h2>
-<input type="text" id="pesquisa" placeholder="Pesquisar por nome, telefone ou tipo..." oninput="filtrarTabela()">
+<div class="search-container">
+  <input type="text" id="pesquisa" placeholder="Pesquisar por nome, telefone, email ou qualquer campo..." oninput="filtrarTabela()">
+</div>
 
-<table id="tabelaContatos">
-  <thead>
-    <tr>
-      <th>Nome</th>
-      <th>Telefones</th>
-      <th>Tipo</th>
-    </tr>
-  </thead>
-  <tbody id="corpoTabela">
-    <tr><td colspan="3">Carregando dados...</td></tr>
-  </tbody>
-</table>
+<div class="scroll-container">
+  <table id="tabelaContatos">
+    <thead>
+      <tr>
+        <th>Nome Completo</th>
+        <th>Telefones</th>
+        <th>E-mail</th>
+        <th>Empresa</th>
+        <th>Outros Detalhes</th>
+      </tr>
+    </thead>
+    <tbody id="corpoTabela">
+      <tr><td colspan="5" class="loading">Carregando dados...</td></tr>
+    </tbody>
+  </table>
+</div>
 
 <script>
 let contatos = [];
 
-// Corrige caracteres mal codificados como ELOÃSA → ELOÍSA
-function corrigirEncoding(nome) {
-  if (!nome) return "";
+// Função para corrigir caracteres mal codificados
+function corrigirEncoding(texto) {
+  if (!texto) return "";
   const mapa = {
-    'Ã¡': 'á', 'Ã ': 'à', 'Ã¢': 'â', 'Ã£': 'ã',
-    'Ãª': 'ê', 'Ã©': 'é', 'Ã¨': 'è',
-    'Ã­': 'í', 'Ã¬': 'ì',
-    'Ã³': 'ó', 'Ã²': 'ò', 'Ã´': 'ô', 'Ãµ': 'õ',
-    'Ãº': 'ú', 'Ã¹': 'ù',
-    'Ã§': 'ç',
-    'Ã': 'Á', 'Ã€': 'À', 'Ã‚': 'Â', 'Ãƒ': 'Ã',
+    'Ã¡': 'á', 'Ã€': 'À', 'Ã‚': 'Â', 'Ãƒ': 'Ã',
     'ÃŠ': 'Ê', 'Ã‰': 'É', 'Ãˆ': 'È',
     'Ã': 'Í', 'ÃŒ': 'Ì',
     'Ã“': 'Ó', 'Ã’': 'Ò', 'Ã”': 'Ô', 'Ã•': 'Õ',
     'Ãš': 'Ú', 'Ã™': 'Ù',
     'Ã‡': 'Ç',
-    'Â': '', // Remove "Â" usado indevidamente
+    'Â': ''
   };
-  let corrigido = nome;
+  let corrigido = texto;
   for (let erro in mapa) {
     corrigido = corrigido.split(erro).join(mapa[erro]);
   }
   return corrigido;
 }
 
-// Corrige nomes comuns que costumam vir sem acento
-function corrigirNomeSemAcento(nome) {
-  const mapa = {
-    'JOAO': 'JOÃO',
-    'MARCIA': 'MÁRCIA',
-    'ELOISA': 'ELOÍSA',
-    'ANA LUISA': 'ANA LUÍSA',
-    'LUCIA': 'LÚCIA',
-    'CLAUDIA': 'CLÁUDIA'
-    // adicione mais conforme necessário
-  };
-  return mapa[nome.toUpperCase()] || nome;
-}
-
+// Formata números de telefone
 function formatarTelefone(telefone) {
   if (!telefone) return '';
   const tel = telefone.replace(/\D/g, '');
   if (tel.length === 11) {
     return `(${tel.slice(0, 2)}) ${tel.slice(2, 7)}-${tel.slice(7)}`;
+  } else if (tel.length === 10) {
+    return `(${tel.slice(0, 2)}) ${tel.slice(2, 6)}-${tel.slice(6)}`;
   }
   return telefone;
 }
 
-function montarNome(contato) {
+// Monta o nome completo
+function montarNomeCompleto(contato) {
   return [contato["First Name"], contato["Middle Name"], contato["Last Name"]]
     .filter(Boolean)
-    .map(n => corrigirNomeSemAcento(corrigirEncoding(n)))
+    .map(n => corrigirEncoding(n))
     .join(" ");
 }
 
-function montarTelefones(contato) {
-  const tel1 = contato["Phone 1 - Value"] ? `${contato["Phone 1 - Label"] || ""}: ${formatarTelefone(contato["Phone 1 - Value"])}` : "";
-  const tel2 = contato["Phone 2 - Value"] ? `${contato["Phone 2 - Label"] || ""}: ${formatarTelefone(contato["Phone 2 - Value"])}` : "";
-  return [tel1, tel2].filter(Boolean).join("<br>");
+// Monta todos os telefones formatados
+function montarTodosTelefones(contato) {
+  const phones = [
+    {label: "Principal", value: contato["Primary Phone"]},
+    {label: "Casa", value: contato["Home Phone"]},
+    {label: "Celular", value: contato["Mobile Phone"]},
+    {label: "Outro", value: contato["Other Phone"]},
+    {label: "Trabalho", value: contato["Business Phone"]}
+  ];
+  
+  return phones
+    .filter(phone => phone.value)
+    .map(phone => `${phone.label}: ${formatarTelefone(phone.value)}`)
+    .join("<br>");
 }
 
+// Monta os emails
+function montarEmails(contato) {
+  const emails = [
+    contato["E-mail Address"],
+    contato["E-mail 2 Address"],
+    contato["E-mail 3 Address"]
+  ];
+  
+  return emails.filter(Boolean).join("<br>");
+}
+
+// Monta detalhes adicionais
+function montarDetalhes(contato) {
+  const details = [];
+  if (contato["Company"]) details.push(`Empresa: ${contato["Company"]}`);
+  if (contato["Job Title"]) details.push(`Cargo: ${contato["Job Title"]}`);
+  if (contato["Department"]) details.push(`Departamento: ${contato["Department"]}`);
+  
+  return details.join("<br>");
+}
+
+// Renderiza a tabela com os contatos
 function renderizarTabela(lista) {
   const corpo = document.getElementById("corpoTabela");
   corpo.innerHTML = "";
 
   if (lista.length === 0) {
-    corpo.innerHTML = "<tr><td colspan='3'>Nenhum contato encontrado.</td></tr>";
+    corpo.innerHTML = `<tr><td colspan="5" class="no-results">Nenhum contato encontrado.</td></tr>`;
     return;
   }
 
   lista.forEach(contato => {
     const linha = document.createElement("tr");
     linha.innerHTML = `
-      <td>${montarNome(contato)}</td>
-      <td>${montarTelefones(contato)}</td>
-      <td>${corrigirNomeSemAcento(corrigirEncoding(contato["Last Name"] || "-"))}</td>
+      <td>${montarNomeCompleto(contato)}</td>
+      <td class="phone-number">${montarTodosTelefones(contato)}</td>
+      <td>${montarEmails(contato)}</td>
+      <td>${corrigirEncoding(contato["Company"] || '')}</td>
+      <td>${montarDetalhes(contato)}</td>
     `;
     corpo.appendChild(linha);
   });
 }
 
+// Filtra a tabela baseado no termo de pesquisa
 function filtrarTabela() {
   const termo = document.getElementById("pesquisa").value.toLowerCase();
-  const filtrados = contatos.filter(c =>
-    montarNome(c).toLowerCase().includes(termo) ||
-    (c["Phone 1 - Value"] && c["Phone 1 - Value"].includes(termo)) ||
-    (c["Phone 2 - Value"] && c["Phone 2 - Value"].includes(termo)) ||
-    (c["Last Name"] && corrigirEncoding(c["Last Name"]).toLowerCase().includes(termo))
-  );
+  
+  if (!termo) {
+    renderizarTabela(contatos);
+    return;
+  }
+
+  const filtrados = contatos.filter(contato => {
+    // Verifica em todos os campos relevantes
+    const camposParaBuscar = [
+      montarNomeCompleto(contato).toLowerCase(),
+      contato["Primary Phone"]?.toLowerCase(),
+      contato["Home Phone"]?.toLowerCase(),
+      contato["Mobile Phone"]?.toLowerCase(),
+      contato["Other Phone"]?.toLowerCase(),
+      contato["Business Phone"]?.toLowerCase(),
+      contato["E-mail Address"]?.toLowerCase(),
+      contato["E-mail 2 Address"]?.toLowerCase(),
+      contato["E-mail 3 Address"]?.toLowerCase(),
+      contato["Company"]?.toLowerCase(),
+      contato["Job Title"]?.toLowerCase(),
+      contato["Department"]?.toLowerCase()
+    ].filter(Boolean);
+
+    return camposParaBuscar.some(campo => campo.includes(termo));
+  });
+
   renderizarTabela(filtrados);
 }
 
+// Carrega os dados do JSON
 fetch('contatos.json')
   .then(response => response.json())
   .then(data => {
-    contatos = data;
+    contatos = Array.isArray(data) ? data : [data];
     renderizarTabela(contatos);
   })
   .catch(error => {
-    document.getElementById("corpoTabela").innerHTML = "<tr><td colspan='3'>Erro ao carregar contatos.</td></tr>";
+    document.getElementById("corpoTabela").innerHTML = 
+      `<tr><td colspan="5" class="no-results">Erro ao carregar contatos: ${error.message}</td></tr>`;
     console.error("Erro ao carregar JSON:", error);
   });
 </script>
