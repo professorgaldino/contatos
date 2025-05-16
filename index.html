@@ -2,25 +2,26 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Tabela de Contatos - Layout Específico</title>
+  <title>Tabela de Contatos - Layout Otimizado</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
+      padding: 15px;
       margin: 0;
+      font-size: 14px;
     }
     .search-container {
       position: sticky;
       top: 0;
       background: white;
-      padding: 15px 0;
+      padding: 12px 0;
       z-index: 100;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     #pesquisa {
       width: 100%;
-      padding: 12px;
-      font-size: 16px;
+      padding: 10px;
+      font-size: 14px;
       border: 1px solid #ddd;
       border-radius: 4px;
       box-sizing: border-box;
@@ -36,13 +37,16 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1800px;
+      table-layout: fixed;
     }
     th, td {
-      padding: 10px 12px;
+      padding: 8px 10px;
       text-align: left;
       border-bottom: 1px solid #ddd;
       white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
     }
     th {
       background-color: #2c3e50;
@@ -50,14 +54,14 @@
       position: sticky;
       top: 0;
       font-weight: normal;
-      font-size: 14px;
+      font-size: 13px;
     }
     tr:hover {
       background-color: #f5f5f5;
     }
     .loading, .no-results {
       text-align: center;
-      padding: 20px;
+      padding: 15px;
     }
     .no-results {
       color: #e74c3c;
@@ -82,42 +86,42 @@
   <table id="tabelaContatos">
     <thead>
       <tr>
-        <th>First Name</th>
-        <th>Middle Name</th>
-        <th>Last Name</th>
-        <th>Phonetic First Name</th>
-        <th>Phonetic Middle Name</th>
-        <th>Phonetic Last Name</th>
-        <th>Name Prefix</th>
-        <th>Name Suffix</th>
-        <th>Nickname</th>
-        <th>File As</th>
-        <th>Organization Name</th>
-        <th>Organization Title</th>
-        <th>Organization Department</th>
-        <th>Birthday</th>
-        <th>Notes</th>
-        <th>Photo</th>
-        <th>Labels</th>
-        <th>E-mail 1 - Label</th>
-        <th>E-mail 1 - Value</th>
-        <th>Phone 1 - Label</th>
-        <th>Phone 1 - Value</th>
-        <th>Phone 2 - Label</th>
-        <th>Phone 2 - Value</th>
-        <th>Phone 3 - Label</th>
-        <th>Phone 3 - Value</th>
-        <th>Phone 4 - Label</th>
-        <th>Phone 4 - Value</th>
-        <th>Address 1 - Label</th>
-        <th>Address 1 - Formatted</th>
-        <th>Address 1 - Street</th>
-        <th>Address 1 - City</th>
-        <th>Address 1 - PO Box</th>
-        <th>Address 1 - Region</th>
-        <th>Address 1 - Postal Code</th>
-        <th>Address 1 - Country</th>
-        <th>Address 1 - Extended Address</th>
+        <th style="width:120px">First Name</th>
+        <th style="width:100px">Middle Name</th>
+        <th style="width:120px">Last Name</th>
+        <th style="width:120px">Phonetic First</th>
+        <th style="width:100px">Phonetic Middle</th>
+        <th style="width:120px">Phonetic Last</th>
+        <th style="width:80px">Name Prefix</th>
+        <th style="width:80px">Name Suffix</th>
+        <th style="width:100px">Nickname</th>
+        <th style="width:100px">File As</th>
+        <th style="width:150px">Organization</th>
+        <th style="width:120px">Org. Title</th>
+        <th style="width:150px">Org. Department</th>
+        <th style="width:80px">Birthday</th>
+        <th style="width:200px">Notes</th>
+        <th style="width:80px">Photo</th>
+        <th style="width:100px">Labels</th>
+        <th style="width:100px">E-mail 1 Label</th>
+        <th style="width:180px">E-mail 1 Value</th>
+        <th style="width:100px">Phone 1 Label</th>
+        <th style="width:120px">Phone 1 Value</th>
+        <th style="width:100px">Phone 2 Label</th>
+        <th style="width:120px">Phone 2 Value</th>
+        <th style="width:100px">Phone 3 Label</th>
+        <th style="width:120px">Phone 3 Value</th>
+        <th style="width:100px">Phone 4 Label</th>
+        <th style="width:120px">Phone 4 Value</th>
+        <th style="width:100px">Address Label</th>
+        <th style="width:200px">Address Formatted</th>
+        <th style="width:150px">Street</th>
+        <th style="width:100px">City</th>
+        <th style="width:80px">PO Box</th>
+        <th style="width:100px">Region</th>
+        <th style="width:80px">Postal Code</th>
+        <th style="width:100px">Country</th>
+        <th style="width:150px">Ext. Address</th>
       </tr>
     </thead>
     <tbody id="corpoTabela">
@@ -145,13 +149,45 @@ const CAMPOS = [
   "Address 1 - Extended Address"
 ];
 
+// Mapa de correção de acentuação
+const mapaAcentos = {
+  'Ã¡': 'á', 'Ã€': 'À', 'Ã‚': 'Â', 'Ãƒ': 'Ã',
+  'ÃŠ': 'Ê', 'Ã‰': 'É', 'Ãˆ': 'È',
+  'Ã': 'Í', 'ÃŒ': 'Ì',
+  'Ã“': 'Ó', 'Ã’': 'Ò', 'Ã”': 'Ô', 'Ã•': 'Õ',
+  'Ãš': 'Ú', 'Ã™': 'Ù',
+  'Ã‡': 'Ç',
+  'Â': '',
+  'Ã§': 'ç',
+  'Ã³': 'ó',
+  'Ã£': 'ã',
+  'Ã©': 'é',
+  'Ãª': 'ê',
+  'Ã­': 'í',
+  'Ãµ': 'õ',
+  'Ãº': 'ú',
+  'Ã¨': 'è',
+  'Ã¬': 'ì',
+  'Ã¹': 'ù'
+};
+
 let contatos = [];
+
+function corrigirAcentos(texto) {
+  if (typeof texto !== 'string') return texto;
+  
+  let corrigido = texto;
+  for (let erro in mapaAcentos) {
+    corrigido = corrigido.split(erro).join(mapaAcentos[erro]);
+  }
+  return corrigido;
+}
 
 function formatarValor(valor) {
   if (valor === null || valor === undefined || valor === "") {
     return '<span class="empty-field">-</span>';
   }
-  return valor;
+  return corrigirAcentos(valor.toString());
 }
 
 function renderizarTabela(dados) {
@@ -170,6 +206,7 @@ function renderizarTabela(dados) {
       const td = document.createElement("td");
       const valor = contato[campo];
       td.innerHTML = formatarValor(valor);
+      td.title = formatarValor(valor); // Tooltip com conteúdo completo
       
       if (valor) td.classList.add("has-value");
       tr.appendChild(td);
@@ -190,7 +227,7 @@ function filtrarTabela() {
   const resultados = contatos.filter(contato => {
     return CAMPOS.some(campo => {
       const valor = contato[campo];
-      return valor && valor.toString().toLowerCase().includes(termo);
+      return valor && corrigirAcentos(valor.toString().toLowerCase()).includes(termo);
     });
   });
 
