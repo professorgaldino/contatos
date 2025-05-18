@@ -127,9 +127,43 @@
   const modal = document.getElementById('modal');
   const modalContent = document.getElementById('modalContent');
 
+  // Mapa de caracteres mal codificados para corrigir
+  const mapaAcentos = {
+    'Ã¡': 'á', 'Ã€': 'À', 'Ã‚': 'Â', 'Ãƒ': 'Ã',
+    'ÃŠ': 'Ê', 'Ã‰': 'É', 'Ãˆ': 'È',
+    'Ã': 'Í', 'ÃŒ': 'Ì',
+    'Ã“': 'Ó', 'Ã’': 'Ò', 'Ã”': 'Ô', 'Ã•': 'Õ',
+    'Ãš': 'Ú', 'Ã™': 'Ù',
+    'Ã‡': 'Ç',
+    'Â': '',
+    'Ã§': 'ç',
+    'Ã³': 'ó',
+    'Ã£': 'ã',
+    'Ã©': 'é',
+    'Ãª': 'ê',
+    'Ã­': 'í',
+    'Ãµ': 'õ',
+    'Ãº': 'ú',
+    'Ã¨': 'è',
+    'Ã¬': 'ì',
+    'Ã¹': 'ù'
+  };
+
+  // Função para corrigir caracteres mal codificados
+  function corrigirMapaAcentos(str) {
+    if (!str) return '';
+    // Para cada chave no mapa, substitui todas as ocorrências no texto
+    Object.keys(mapaAcentos).forEach(chave => {
+      const regex = new RegExp(chave, 'g');
+      str = str.replace(regex, mapaAcentos[chave]);
+    });
+    return str;
+  }
+
   // Remove acentos e normaliza texto
   function corrigirAcentos(str) {
     if (!str) return '';
+    str = corrigirMapaAcentos(str);
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
 
@@ -154,9 +188,9 @@
       <h2>${corrigirAcentos(nomeCompleto)}</h2>
 
       <h3>Informações Básicas</h3>
-      <p><strong>Organização:</strong> ${contato["Organization Name"] || '-'}</p>
-      <p><strong>Cargo:</strong> ${contato["Organization Title"] || '-'}</p>
-      <p><strong>Departamento:</strong> ${contato["Organization Department"] || '-'}</p>
+      <p><strong>Organização:</strong> ${corrigirAcentos(contato["Organization Name"]) || '-'}</p>
+      <p><strong>Cargo:</strong> ${corrigirAcentos(contato["Organization Title"]) || '-'}</p>
+      <p><strong>Departamento:</strong> ${corrigirAcentos(contato["Organization Department"]) || '-'}</p>
 
       <h3>Contatos</h3>
       <p><strong>E-mail:</strong> ${contato["E-mail 1 - Value"] || '-'}</p>
@@ -164,13 +198,13 @@
       <p><strong>${contato["Phone 2 - Label"] || 'Telefone 2'}:</strong> ${contato["Phone 2 - Value"] ? formatarTelefone(contato["Phone 2 - Value"]) : '-'}</p>
 
       <h3>Endereço</h3>
-      <p>${contato["Address 1 - Formatted"] || contato["Address 1 - Street"] || '-'}</p>
-      <p>${[contato["Address 1 - City"], contato["Address 1 - Region"]].filter(Boolean).join(", ") || '-'}</p>
-      <p>${contato["Address 1 - Postal Code"] || ''} ${contato["Address 1 - Country"] || ''}</p>
+      <p>${corrigirAcentos(contato["Address 1 - Formatted"]) || corrigirAcentos(contato["Address 1 - Street"]) || '-'}</p>
+      <p>${[corrigirAcentos(contato["Address 1 - City"]), corrigirAcentos(contato["Address 1 - Region"])].filter(Boolean).join(", ") || '-'}</p>
+      <p>${contato["Address 1 - Postal Code"] || ''} ${corrigirAcentos(contato["Address 1 - Country"]) || ''}</p>
 
       <h3>Outras Informações</h3>
       <p><strong>Aniversário:</strong> ${contato["Birthday"] || '-'}</p>
-      <p><strong>Notas:</strong> ${contato["Notes"] || '-'}</p>
+      <p><strong>Notas:</strong> ${corrigirAcentos(contato["Notes"]) || '-'}</p>
     `;
 
     modalContent.innerHTML = `<span id="modalClose">&times;</span>` + html;
@@ -216,6 +250,7 @@
   // Normaliza texto para busca
   function normalizar(texto) {
     if (!texto) return '';
+    texto = corrigirMapaAcentos(texto);
     return corrigirAcentos(texto).toLowerCase();
   }
 
@@ -249,28 +284,31 @@
     filtrarContatos();
   });
 
-  // Fecha modal se clicar fora do conteúdo
+  // Fechar modal ao clicar fora
   window.onclick = function(event) {
     if (event.target === modal) {
       modal.style.display = "none";
     }
   };
 
-  // Carrega contatos do arquivo JSON
-  async function carregarContatos() {
+  // Carrega os dados JSON
+  async function carregarDados() {
     try {
-      const response = await fetch('contatos.json');
-      if (!response.ok) throw new Error('Falha ao carregar contatos.json');
-      contatos = await response.json();
+      const resposta = await fetch('dados.json');
+      const json = await resposta.json();
+      contatos = json;
       contatosFiltrados = contatos;
-      renderizarLista();
-    } catch (error) {
-      listaContatos.innerHTML = `<li class="nenhum-resultado">Erro ao carregar contatos: ${error.message}</li>`;
+      filtrarContatos();
+    } catch (erro) {
+      listaContatos.innerHTML = '<li class="nenhum-resultado">Erro ao carregar contatos.</li>';
       btnCarregarMais.style.display = 'none';
+      semMais.style.display = 'none';
+      console.error('Erro ao carregar dados:', erro);
     }
   }
 
-  carregarContatos();
+  carregarDados();
+
 </script>
 
 </body>
