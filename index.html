@@ -282,34 +282,45 @@
   });
 
   campoBusca.addEventListener('input', () => {
-    filtrarContatos();
-  });
+      function filtrarContatos() {
+    const termo = normalizar(campoBusca.value.trim());
+    paginaAtual = 0;
 
-  // Fechar modal ao clicar fora
-  window.onclick = function(event) {
-    if (event.target === modal) {
-      modal.style.display = "none";
+    if (!termo) {
+      contatosFiltrados = [...contatos];
+    } else {
+      contatosFiltrados = contatos.filter(c => {
+        const nome = [c["First Name"], c["Middle Name"], c["Last Name"]].filter(Boolean).join(" ");
+        return normalizar(nome).includes(termo);
+      });
     }
-  };
 
-  // Carrega os dados JSON
-  async function carregarDados() {
+    renderizarLista();
+  }
+
+  // Carrega os contatos de um JSON
+  async function carregarContatos() {
     try {
-      const resposta = await fetch('contatos.json');
-      const json = await resposta.json();
-      contatos = json;
-      contatosFiltrados = contatos;
-      filtrarContatos();
+      const resposta = await fetch("contatos.json");
+      contatos = await resposta.json();
+      contatosFiltrados = [...contatos];
+      renderizarLista();
     } catch (erro) {
-      listaContatos.innerHTML = '<li class="nenhum-resultado">Erro ao carregar contatos.</li>';
-      btnCarregarMais.style.display = 'none';
-      semMais.style.display = 'none';
-      console.error('Erro ao carregar dados:', erro);
+      console.error("Erro ao carregar contatos:", erro);
+      listaContatos.innerHTML = '<li class="nenhum-resultado">Erro ao carregar os contatos.</li>';
     }
   }
 
-  carregarDados();
+  campoBusca.addEventListener('input', () => {
+    filtrarContatos();
+  });
 
+  btnCarregarMais.addEventListener('click', () => {
+    paginaAtual++;
+    renderizarLista();
+  });
+
+  carregarContatos();
 </script>
 
 </body>
