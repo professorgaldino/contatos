@@ -64,27 +64,22 @@
     display: none;
     position: fixed;
     z-index: 1000;
+    padding-top: 60px;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    /* Flexbox para centralizar */
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    overflow: auto;
     background-color: rgba(0,0,0,0.5);
-    padding: 20px; /* pra não colar nas bordas em telas pequenas */
-    box-sizing: border-box;
   }
   #modalContent {
     background-color: #fff;
+    margin: auto;
+    padding: 20px;
     border-radius: 8px;
     width: 90%;
     max-width: 600px;
-    max-height: 90vh; /* para não ultrapassar a altura da tela */
-    overflow-y: auto;
     position: relative;
-    padding: 20px;
   }
   #modalClose {
     position: absolute;
