@@ -294,7 +294,7 @@
   // Carrega os dados JSON
   async function carregarDados() {
     try {
-      const resposta = await fetch('dados.json');
+      const resposta = await fetch('contatos.json');
       const json = await resposta.json();
       contatos = json;
       contatosFiltrados = contatos;
