@@ -1,118 +1,112 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Lista de Contatos</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    background: #f9f9f9;
-  }
-  #campoBusca {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-  #listaContatos {
-    list-style: none;
-    padding: 0;
-    max-height: 400px;
-    overflow-y: auto;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-  }
-  #listaContatos li {
-    padding: 10px;
-    border-bottom: 1px solid #eee;
-    cursor: pointer;
-  }
-  #listaContatos li:hover {
-    background-color: #f0f0f0;
-  }
-  .nenhum-resultado {
-    text-align: center;
-    color: #888;
-    padding: 20px;
-  }
-  #btnCarregarMais {
-    margin: 10px 0;
-    padding: 10px 20px;
-    font-size: 16px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  #btnCarregarMais:hover {
-    background-color: #0056b3;
-  }
-  #semMais {
-    color: #888;
-    text-align: center;
-    margin: 10px 0;
-    display: none;
-  }
-  /* Modal */
-  #modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    padding-top: 60px;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0,0,0,0.5);
-  }
-  #modalContent {
-    background-color: #fff;
-    margin: auto;
-    padding: 20px;
-    border-radius: 8px;
-    width: 90%;
-    max-width: 600px;
-    position: relative;
-  }
-  #modalClose {
-    position: absolute;
-    right: 15px;
-    top: 10px;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  #modalClose:hover {
-    color: red;
-  }
-  #modalContent h3 {
-    margin-top: 20px;
-  }
-  #modalContent p {
-    margin: 5px 0;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lista de Contatos</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      background: #f9f9f9;
+    }
+    #campoBusca {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #listaContatos {
+      list-style: none;
+      padding: 0;
+      max-height: 400px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    #listaContatos li {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    #listaContatos li:hover {
+      background-color: #f0f0f0;
+    }
+    .nenhum-resultado {
+      text-align: center;
+      color: #888;
+      padding: 20px;
+    }
+    #btnCarregarMais {
+      margin: 10px 0;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    #btnCarregarMais:hover {
+      background-color: #0056b3;
+    }
+    #semMais {
+      color: #888;
+      text-align: center;
+      margin: 10px 0;
+      display: none;
+    }
+    #modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      padding-top: 60px;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    #modalContent {
+      background-color: #fff;
+      margin: auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 600px;
+      position: relative;
+    }
+    #modalClose {
+      position: absolute;
+      right: 15px;
+      top: 10px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #modalClose:hover {
+      color: red;
+    }
+    #modalContent h3 {
+      margin-top: 20px;
+    }
+    #modalContent p {
+      margin: 5px 0;
+    }
+  </style>
 </head>
 <body>
 
 <input type="text" id="campoBusca" placeholder="Buscar contatos..." autocomplete="off" />
-
 <ul id="listaContatos"></ul>
-
 <button id="btnCarregarMais" style="display:none;">Carregar mais</button>
 <p id="semMais">Não há mais contatos para carregar.</p>
 
-<!-- Modal -->
-<div id="modal">
-  <div id="modalContent"></div>
-</div>
+<div id="modal"><div id="modalContent"></div></div>
 
 <script>
   let contatos = [];
@@ -127,33 +121,18 @@
   const modal = document.getElementById('modal');
   const modalContent = document.getElementById('modalContent');
 
-  // Mapa de caracteres mal codificados para corrigir
   const mapaAcentos = {
     'Ã¡': 'á', 'Ã€': 'À', 'Ã‚': 'Â', 'Ãƒ': 'Ã',
-    'ÃŠ': 'Ê', 'Ã‰': 'É', 'Ãˆ': 'È',
-    'Ã': 'Í', 'ÃŒ': 'Ì',
+    'ÃŠ': 'Ê', 'Ã‰': 'É', 'Ãˆ': 'È', 'Ã': 'Í', 'ÃŒ': 'Ì',
     'Ã“': 'Ó', 'Ã’': 'Ò', 'Ã”': 'Ô', 'Ã•': 'Õ',
-    'Ãš': 'Ú', 'Ã™': 'Ù',
-    'Ã‡': 'Ç',
-    'Â': '',
-    'Ã§': 'ç',
-    'Ã³': 'ó',
-    'Ã£': 'ã',
-    'Ã©': 'é',
-    'Ãª': 'ê',
-    'Ã­': 'í',
-    'Ãµ': 'õ',
-    'Ãº': 'ú',
-    'Ã¨': 'è',
-    'Ã¬': 'ì',
-    'Ã¹': 'ù',
-    '': 'Á'
+    'Ãš': 'Ú', 'Ã™': 'Ù', 'Ã‡': 'Ç', 'Ã§': 'ç',
+    'Ã³': 'ó', 'Ã£': 'ã', 'Ã©': 'é', 'Ãª': 'ê',
+    'Ã­': 'í', 'Ãµ': 'õ', 'Ãº': 'ú', 'Ã¨': 'è',
+    'Ã¬': 'ì', 'Ã¹': 'ù', 'Â': '', '': 'Á'
   };
 
-  // Função para corrigir caracteres mal codificados
   function corrigirMapaAcentos(str) {
     if (!str) return '';
-    // Para cada chave no mapa, substitui todas as ocorrências no texto
     Object.keys(mapaAcentos).forEach(chave => {
       const regex = new RegExp(chave, 'g');
       str = str.replace(regex, mapaAcentos[chave]);
@@ -161,14 +140,12 @@
     return str;
   }
 
-  // Remove acentos e normaliza texto
   function corrigirAcentos(str) {
     if (!str) return '';
     str = corrigirMapaAcentos(str);
     return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
 
-  // Formata telefone brasileiro
   function formatarTelefone(tel) {
     if (!tel) return '-';
     let numeros = tel.replace(/\D/g, '');
@@ -181,42 +158,32 @@
     }
   }
 
-  // Exibe detalhes do contato no modal
   function mostrarDetalhes(contato) {
     const nomeCompleto = [contato["First Name"], contato["Middle Name"], contato["Last Name"]].filter(Boolean).join(" ") || '-';
-
     const html = `
+      <span id="modalClose">&times;</span>
       <h2>${corrigirAcentos(nomeCompleto)}</h2>
-
       <h3>Informações Básicas</h3>
       <p><strong>Organização:</strong> ${corrigirAcentos(contato["Organization Name"]) || '-'}</p>
       <p><strong>Cargo:</strong> ${corrigirAcentos(contato["Organization Title"]) || '-'}</p>
       <p><strong>Departamento:</strong> ${corrigirAcentos(contato["Organization Department"]) || '-'}</p>
-
       <h3>Contatos</h3>
       <p><strong>E-mail:</strong> ${contato["E-mail 1 - Value"] || '-'}</p>
       <p><strong>${contato["Phone 1 - Label"] || 'Telefone'}:</strong> ${contato["Phone 1 - Value"] ? formatarTelefone(contato["Phone 1 - Value"]) : '-'}</p>
       <p><strong>${contato["Phone 2 - Label"] || 'Telefone 2'}:</strong> ${contato["Phone 2 - Value"] ? formatarTelefone(contato["Phone 2 - Value"]) : '-'}</p>
-
       <h3>Endereço</h3>
       <p>${corrigirAcentos(contato["Address 1 - Formatted"]) || corrigirAcentos(contato["Address 1 - Street"]) || '-'}</p>
       <p>${[corrigirAcentos(contato["Address 1 - City"]), corrigirAcentos(contato["Address 1 - Region"])].filter(Boolean).join(", ") || '-'}</p>
       <p>${contato["Address 1 - Postal Code"] || ''} ${corrigirAcentos(contato["Address 1 - Country"]) || ''}</p>
-
       <h3>Outras Informações</h3>
       <p><strong>Aniversário:</strong> ${contato["Birthday"] || '-'}</p>
       <p><strong>Notas:</strong> ${corrigirAcentos(contato["Notes"]) || '-'}</p>
     `;
-
-    modalContent.innerHTML = `<span id="modalClose">&times;</span>` + html;
+    modalContent.innerHTML = html;
     modal.style.display = "block";
-
-    document.getElementById('modalClose').onclick = () => {
-      modal.style.display = "none";
-    };
+    document.getElementById('modalClose').onclick = () => modal.style.display = "none";
   }
 
-  // Renderiza a lista paginada
   function renderizarLista() {
     if (paginaAtual === 0) listaContatos.innerHTML = '';
     const inicio = paginaAtual * itensPorPagina;
@@ -248,80 +215,40 @@
     }
   }
 
-  // Normaliza texto para busca
   function normalizar(texto) {
     if (!texto) return '';
     texto = corrigirMapaAcentos(texto);
     return corrigirAcentos(texto).toLowerCase();
   }
 
-  // Filtra contatos e reseta paginação
   function filtrarContatos() {
     const termo = normalizar(campoBusca.value.trim());
     paginaAtual = 0;
+    contatosFiltrados = termo === '' ? contatos : contatos.filter(contato => {
+      const nome = normalizar([contato["First Name"], contato["Middle Name"], contato["Last Name"]].filter(Boolean).join(" "));
+      return nome.includes(termo);
+    });
+    renderizarLista();
+  }
 
-    if (termo === '') {
+  campoBusca.addEventListener('input', filtrarContatos);
+  btnCarregarMais.addEventListener('click', () => {
+    paginaAtual++;
+    renderizarLista();
+  });
+
+  // Carrega o JSON com os contatos
+  fetch('contatos.json')
+    .then(res => res.json())
+    .then(data => {
+      contatos = data;
       contatosFiltrados = contatos;
-    } else {
-      contatosFiltrados = contatos.filter(c => {
-        const nome = normalizar([c["First Name"], c["Middle Name"], c["Last Name"]].filter(Boolean).join(" "));
-        const org = normalizar(c["Organization Name"] || '');
-        const cargo = normalizar(c["Organization Title"] || '');
-        const email = normalizar(c["E-mail 1 - Value"] || '');
-        return nome.includes(termo) || org.includes(termo) || cargo.includes(termo) || email.includes(termo);
-      });
-    }
-    listaContatos.innerHTML = '';
-    renderizarLista();
-  }
-
-  // Evento botão carregar mais
-  btnCarregarMais.addEventListener('click', () => {
-    paginaAtual++;
-    renderizarLista();
-  });
-
-  campoBusca.addEventListener('input', () => {
-      function filtrarContatos() {
-    const termo = normalizar(campoBusca.value.trim());
-    paginaAtual = 0;
-
-    if (!termo) {
-      contatosFiltrados = [...contatos];
-    } else {
-      contatosFiltrados = contatos.filter(c => {
-        const nome = [c["First Name"], c["Middle Name"], c["Last Name"]].filter(Boolean).join(" ");
-        return normalizar(nome).includes(termo);
-      });
-    }
-
-    renderizarLista();
-  }
-
-  // Carrega os contatos de um JSON
-  async function carregarContatos() {
-    try {
-      const resposta = await fetch("contatos.json");
-      contatos = await resposta.json();
-      contatosFiltrados = [...contatos];
       renderizarLista();
-    } catch (erro) {
-      console.error("Erro ao carregar contatos:", erro);
-      listaContatos.innerHTML = '<li class="nenhum-resultado">Erro ao carregar os contatos.</li>';
-    }
-  }
-
-  campoBusca.addEventListener('input', () => {
-    filtrarContatos();
-  });
-
-  btnCarregarMais.addEventListener('click', () => {
-    paginaAtual++;
-    renderizarLista();
-  });
-
-  carregarContatos();
+    })
+    .catch(err => {
+      listaContatos.innerHTML = '<li class="nenhum-resultado">Erro ao carregar contatos.</li>';
+      console.error(err);
+    });
 </script>
-
 </body>
 </html>
