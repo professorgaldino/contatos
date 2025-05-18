@@ -1,206 +1,276 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Contatos</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-      background-color: #f4f4f4;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    th, td {
-      padding: 8px;
-      border: 1px solid #ddd;
-      text-align: left;
-      font-size: 14px;
-    }
-
-    th {
-      background-color: #007BFF;
-      color: white;
-      position: sticky;
-      top: 0;
-      z-index: 1;
-    }
-
-    tr:hover {
-      background-color: #f1f1f1;
-      cursor: pointer;
-    }
-
-    .empty-field {
-      color: #bbb;
-      font-style: italic;
-    }
-
-    .no-results {
-      text-align: center;
-      font-weight: bold;
-      color: #d00;
-      padding: 20px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lista de Contatos</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    background: #f9f9f9;
+  }
+  #campoBusca {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+  #listaContatos {
+    list-style: none;
+    padding: 0;
+    max-height: 400px;
+    overflow-y: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+  }
+  #listaContatos li {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+  }
+  #listaContatos li:hover {
+    background-color: #f0f0f0;
+  }
+  .nenhum-resultado {
+    text-align: center;
+    color: #888;
+    padding: 20px;
+  }
+  #btnCarregarMais {
+    margin: 10px 0;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  #btnCarregarMais:hover {
+    background-color: #0056b3;
+  }
+  #semMais {
+    color: #888;
+    text-align: center;
+    margin: 10px 0;
+    display: none;
+  }
+  /* Modal */
+  #modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    padding-top: 60px;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.5);
+  }
+  #modalContent {
+    background-color: #fff;
+    margin: auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 600px;
+    position: relative;
+  }
+  #modalClose {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  #modalClose:hover {
+    color: red;
+  }
+  #modalContent h3 {
+    margin-top: 20px;
+  }
+  #modalContent p {
+    margin: 5px 0;
+  }
+</style>
 </head>
 <body>
 
-<h1>Lista de Contatos</h1>
+<input type="text" id="campoBusca" placeholder="Buscar contatos..." autocomplete="off" />
 
-<input type="text" id="pesquisa" placeholder="Digite para buscar...">
+<ul id="listaContatos"></ul>
 
-<table>
-  <thead>
-    <tr>
-      <th>First Name</th>
-      <th>Middle Name</th>
-      <th>Last Name</th>
-      <th>Phonetic First Name</th>
-      <th>Phonetic Middle Name</th>
-      <th>Phonetic Last Name</th>
-      <th>Name Prefix</th>
-      <th>Name Suffix</th>
-      <th>Nickname</th>
-      <th>File As</th>
-      <th>Organization Name</th>
-      <th>Organization Title</th>
-      <th>Organization Department</th>
-      <th>Birthday</th>
-      <th>Notes</th>
-      <th>Photo</th>
-      <th>Labels</th>
-      <th>E-mail 1 - Label</th>
-      <th>E-mail 1 - Value</th>
-      <th>Phone 1 - Label</th>
-      <th>Phone 1 - Value</th>
-      <th>Phone 2 - Label</th>
-      <th>Phone 2 - Value</th>
-      <th>Phone 3 - Label</th>
-      <th>Phone 3 - Value</th>
-      <th>Phone 4 - Label</th>
-      <th>Phone 4 - Value</th>
-      <th>Address 1 - Label</th>
-      <th>Address 1 - Formatted</th>
-      <th>Address 1 - Street</th>
-      <th>Address 1 - City</th>
-      <th>Address 1 - PO Box</th>
-      <th>Address 1 - Region</th>
-      <th>Address 1 - Postal Code</th>
-      <th>Address 1 - Country</th>
-      <th>Address 1 - Extended Address</th>
-    </tr>
-  </thead>
-  <tbody id="corpoTabela"></tbody>
-</table>
+<button id="btnCarregarMais" style="display:none;">Carregar mais</button>
+<p id="semMais">Não há mais contatos para carregar.</p>
+
+<!-- Modal -->
+<div id="modal">
+  <div id="modalContent"></div>
+</div>
 
 <script>
-let contatos = [];
-let contatosFiltrados = [];
+  let contatos = [];
+  let contatosFiltrados = [];
+  let paginaAtual = 0;
+  const itensPorPagina = 20;
 
-function normalizarTexto(texto) {
-  return texto
-    ?.normalize("NFD")                // separa os acentos
-    .replace(/[\u0300-\u036f]/g, "") // remove os acentos
-    .toLowerCase()
-    .trim();
-}
+  const campoBusca = document.getElementById('campoBusca');
+  const listaContatos = document.getElementById('listaContatos');
+  const btnCarregarMais = document.getElementById('btnCarregarMais');
+  const semMais = document.getElementById('semMais');
+  const modal = document.getElementById('modal');
+  const modalContent = document.getElementById('modalContent');
 
-function filtrarTabela() {
-  const termo = normalizarTexto(document.getElementById("pesquisa").value);
-  if (!termo) {
-    renderizarTabela(contatos.slice(0, 300)); // mostra só os primeiros 300
-    return;
+  // Remove acentos e normaliza texto
+  function corrigirAcentos(str) {
+    if (!str) return '';
+    return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   }
 
-  contatosFiltrados = contatos.filter(c => {
-    return Object.values(c).some(v => normalizarTexto(v).includes(termo));
-  });
-
-  renderizarTabela(contatosFiltrados.slice(0, 300));
-}
-
-function renderizarTabela(dados) {
-  const tbody = document.getElementById("corpoTabela");
-  tbody.innerHTML = "";
-
-  if (dados.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="36" class="no-results">Nenhum resultado encontrado</td></tr>`;
-    return;
+  // Formata telefone brasileiro
+  function formatarTelefone(tel) {
+    if (!tel) return '-';
+    let numeros = tel.replace(/\D/g, '');
+    if (numeros.length === 11) {
+      return `(${numeros.substr(0,2)}) ${numeros.substr(2,5)}-${numeros.substr(7,4)}`;
+    } else if (numeros.length === 10) {
+      return `(${numeros.substr(0,2)}) ${numeros.substr(2,4)}-${numeros.substr(6,4)}`;
+    } else {
+      return tel;
+    }
   }
 
-  const fragment = document.createDocumentFragment();
-  dados.forEach(contato => {
-    const tr = document.createElement("tr");
-    tr.addEventListener("click", () => mostrarDetalhes(contato));
+  // Exibe detalhes do contato no modal
+  function mostrarDetalhes(contato) {
+    const nomeCompleto = [contato["First Name"], contato["Middle Name"], contato["Last Name"]].filter(Boolean).join(" ") || '-';
 
-    const campos = [
-      "First Name", "Middle Name", "Last Name",
-      "Phonetic First Name", "Phonetic Middle Name", "Phonetic Last Name",
-      "Name Prefix", "Name Suffix", "Nickname", "File As",
-      "Organization Name", "Organization Title", "Organization Department",
-      "Birthday", "Notes", "Photo", "Labels",
-      "E-mail 1 - Label", "E-mail 1 - Value",
-      "Phone 1 - Label", "Phone 1 - Value",
-      "Phone 2 - Label", "Phone 2 - Value",
-      "Phone 3 - Label", "Phone 3 - Value",
-      "Phone 4 - Label", "Phone 4 - Value",
-      "Address 1 - Label", "Address 1 - Formatted", "Address 1 - Street",
-      "Address 1 - City", "Address 1 - PO Box", "Address 1 - Region",
-      "Address 1 - Postal Code", "Address 1 - Country", "Address 1 - Extended Address"
-    ];
+    const html = `
+      <h2>${corrigirAcentos(nomeCompleto)}</h2>
 
-    campos.forEach(campo => {
-      const td = document.createElement("td");
-      const valor = contato[campo] || '';
-      td.textContent = valor;
-      if (!valor) {
-        td.classList.add("empty-field");
-        td.textContent = "-";
-      }
-      tr.appendChild(td);
+      <h3>Informações Básicas</h3>
+      <p><strong>Organização:</strong> ${contato["Organization Name"] || '-'}</p>
+      <p><strong>Cargo:</strong> ${contato["Organization Title"] || '-'}</p>
+      <p><strong>Departamento:</strong> ${contato["Organization Department"] || '-'}</p>
+
+      <h3>Contatos</h3>
+      <p><strong>E-mail:</strong> ${contato["E-mail 1 - Value"] || '-'}</p>
+      <p><strong>${contato["Phone 1 - Label"] || 'Telefone'}:</strong> ${contato["Phone 1 - Value"] ? formatarTelefone(contato["Phone 1 - Value"]) : '-'}</p>
+      <p><strong>${contato["Phone 2 - Label"] || 'Telefone 2'}:</strong> ${contato["Phone 2 - Value"] ? formatarTelefone(contato["Phone 2 - Value"]) : '-'}</p>
+
+      <h3>Endereço</h3>
+      <p>${contato["Address 1 - Formatted"] || contato["Address 1 - Street"] || '-'}</p>
+      <p>${[contato["Address 1 - City"], contato["Address 1 - Region"]].filter(Boolean).join(", ") || '-'}</p>
+      <p>${contato["Address 1 - Postal Code"] || ''} ${contato["Address 1 - Country"] || ''}</p>
+
+      <h3>Outras Informações</h3>
+      <p><strong>Aniversário:</strong> ${contato["Birthday"] || '-'}</p>
+      <p><strong>Notas:</strong> ${contato["Notes"] || '-'}</p>
+    `;
+
+    modalContent.innerHTML = `<span id="modalClose">&times;</span>` + html;
+    modal.style.display = "block";
+
+    document.getElementById('modalClose').onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  // Renderiza a lista paginada
+  function renderizarLista() {
+    if (paginaAtual === 0) listaContatos.innerHTML = '';
+    const inicio = paginaAtual * itensPorPagina;
+    const fim = inicio + itensPorPagina;
+    const paginaContatos = contatosFiltrados.slice(inicio, fim);
+
+    if (paginaContatos.length === 0 && paginaAtual === 0) {
+      listaContatos.innerHTML = '<li class="nenhum-resultado">Nenhum contato encontrado.</li>';
+      btnCarregarMais.style.display = 'none';
+      semMais.style.display = 'none';
+      return;
+    }
+
+    paginaContatos.forEach(contato => {
+      const nomeCompleto = [contato["First Name"], contato["Middle Name"], contato["Last Name"]].filter(Boolean).join(" ") || '-';
+      const li = document.createElement('li');
+      li.textContent = corrigirAcentos(nomeCompleto);
+      li.title = "Clique para ver detalhes";
+      li.onclick = () => mostrarDetalhes(contato);
+      listaContatos.appendChild(li);
     });
 
-    fragment.appendChild(tr);
+    if (fim >= contatosFiltrados.length) {
+      btnCarregarMais.style.display = 'none';
+      semMais.style.display = 'block';
+    } else {
+      btnCarregarMais.style.display = 'block';
+      semMais.style.display = 'none';
+    }
+  }
+
+  // Normaliza texto para busca
+  function normalizar(texto) {
+    if (!texto) return '';
+    return corrigirAcentos(texto).toLowerCase();
+  }
+
+  // Filtra contatos e reseta paginação
+  function filtrarContatos() {
+    const termo = normalizar(campoBusca.value.trim());
+    paginaAtual = 0;
+
+    if (termo === '') {
+      contatosFiltrados = contatos;
+    } else {
+      contatosFiltrados = contatos.filter(c => {
+        const nome = normalizar([c["First Name"], c["Middle Name"], c["Last Name"]].filter(Boolean).join(" "));
+        const org = normalizar(c["Organization Name"] || '');
+        const cargo = normalizar(c["Organization Title"] || '');
+        const email = normalizar(c["E-mail 1 - Value"] || '');
+        return nome.includes(termo) || org.includes(termo) || cargo.includes(termo) || email.includes(termo);
+      });
+    }
+    listaContatos.innerHTML = '';
+    renderizarLista();
+  }
+
+  // Evento botão carregar mais
+  btnCarregarMais.addEventListener('click', () => {
+    paginaAtual++;
+    renderizarLista();
   });
 
-  tbody.appendChild(fragment);
-}
-
-// Simula clique (você pode remover ou implementar o que quiser aqui)
-function mostrarDetalhes(contato) {
-  console.log("Contato selecionado:", contato);
-}
-
-// Carregar os contatos
-fetch("contatos.json")
-  .then(response => response.json())
-  .then(data => {
-    contatos = data;
-    renderizarTabela(contatos.slice(0, 300));
-  })
-  .catch(error => {
-    console.error("Erro ao carregar contatos:", error);
-    document.getElementById("corpoTabela").innerHTML =
-      `<tr><td colspan="36" class="no-results">Erro ao carregar os contatos.</td></tr>`;
+  campoBusca.addEventListener('input', () => {
+    filtrarContatos();
   });
 
-document.getElementById("pesquisa").addEventListener("input", filtrarTabela);
+  // Fecha modal se clicar fora do conteúdo
+  window.onclick = function(event) {
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  };
+
+  // Carrega contatos do arquivo JSON
+  async function carregarContatos() {
+    try {
+      const response = await fetch('contatos.json');
+      if (!response.ok) throw new Error('Falha ao carregar contatos.json');
+      contatos = await response.json();
+      contatosFiltrados = contatos;
+      renderizarLista();
+    } catch (error) {
+      listaContatos.innerHTML = `<li class="nenhum-resultado">Erro ao carregar contatos: ${error.message}</li>`;
+      btnCarregarMais.style.display = 'none';
+    }
+  }
+
+  carregarContatos();
 </script>
 
 </body>
